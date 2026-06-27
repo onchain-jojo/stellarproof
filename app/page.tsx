@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-const CONTRACT_ID = "CBPFYB4FPM3TO5UQ7BTWFV56B2F5NSVUSHXZ7AI5SAI74HHEPS2REIQG";
+const CONTRACT_ID = "CAB232Q6K6WIHILWAAHW4K5DQQ4Q3ZRGOHSMRZSBTCXKDAHTOIVBDVCV";
 
 export default function Home() {
   const [age, setAge] = useState("");
