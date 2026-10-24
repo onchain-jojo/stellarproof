@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import History, { type Attempt } from "./components/History";
 import { CONTRACT_ID, EXPLORER_URL } from "./config";
+import { useI18n } from "./i18n";
 
 const COUNTRY_NAMES: Record<number, string> = {
   254: "Kenya",
@@ -41,6 +42,7 @@ function parseCodes(raw: string): number[] {
 }
 
 export default function Home() {
+  const { t } = useI18n();
   const [age, setAge] = useState("");
   const [country, setCountry] = useState("254");
   const [minAge, setMinAge] = useState("18");
@@ -99,25 +101,23 @@ export default function Home() {
           </div>
           <div>
             <h1 className="text-xl font-semibold tracking-tight">StellarProof</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Privacy-preserving KYC on Stellar</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t("subtitle")}</p>
           </div>
         </div>
 
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
-          <h2 className="text-lg font-semibold">Verify your eligibility</h2>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Prove you meet the requirements without revealing your data.
-          </p>
+          <h2 className="text-lg font-semibold">{t("verifyTitle")}</h2>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("verifySub")}</p>
 
           <div className="mt-6 space-y-5">
             <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                Policy (set by the verifier)
+                {t("policy")}
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label htmlFor="minAge" className="mb-1.5 block text-sm font-medium">
-                    Minimum age
+                    {t("minAge")}
                   </label>
                   <input
                     id="minAge"
@@ -133,7 +133,7 @@ export default function Home() {
                 </div>
                 <div>
                   <label htmlFor="allowed" className="mb-1.5 block text-sm font-medium">
-                    Allowed codes
+                    {t("allowedCodes")}
                   </label>
                   <input
                     id="allowed"
@@ -148,16 +148,14 @@ export default function Home() {
                   />
                 </div>
               </div>
-              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                Separate country codes with commas.
-              </p>
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{t("codesHint")}</p>
             </div>
 
             <div>
               <label htmlFor="age" className="mb-1.5 flex items-center justify-between text-sm font-medium">
-                Your age
+                {t("yourAge")}
                 <span className="inline-flex items-center gap-1 text-xs font-normal text-gray-500 dark:text-gray-400">
-                  <Icon d={ICONS.lock} className="h-3 w-3" /> Private
+                  <Icon d={ICONS.lock} className="h-3 w-3" /> {t("private")}
                 </span>
               </label>
               <input
@@ -169,16 +167,16 @@ export default function Home() {
                   setAge(e.target.value);
                   setResult(null);
                 }}
-                placeholder="Enter your age"
+                placeholder={t("agePh")}
                 className={inputClass}
               />
             </div>
 
             <div>
               <label htmlFor="country" className="mb-1.5 flex items-center justify-between text-sm font-medium">
-                Your country code
+                {t("yourCountry")}
                 <span className="inline-flex items-center gap-1 text-xs font-normal text-gray-500 dark:text-gray-400">
-                  <Icon d={ICONS.lock} className="h-3 w-3" /> Private
+                  <Icon d={ICONS.lock} className="h-3 w-3" /> {t("private")}
                 </span>
               </label>
               <input
@@ -196,17 +194,20 @@ export default function Home() {
 
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm dark:border-gray-800 dark:bg-gray-950/50">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-                Requirements
+                {t("requirements")}
               </p>
               <ul className="space-y-1.5 text-gray-700 dark:text-gray-300">
                 <li className="flex items-center gap-2">
                   <Icon d={ICONS.check} className="h-4 w-4 text-indigo-500" />
-                  Minimum age: <span className="font-medium text-gray-900 dark:text-white">{minAgeNum || "-"}</span>
+                  <span>
+                    {t("minAgeReq")}{" "}
+                    <span className="font-medium text-gray-900 dark:text-white">{minAgeNum || "-"}</span>
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Icon d={ICONS.check} className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
                   <span>
-                    Allowed countries:{" "}
+                    {t("allowedReq")}{" "}
                     <span className="font-medium text-gray-900 dark:text-white">
                       {allowed.length
                         ? allowed.map((c) => (COUNTRY_NAMES[c] ? `${COUNTRY_NAMES[c]} (${c})` : String(c))).join(", ")
@@ -216,8 +217,8 @@ export default function Home() {
                 </li>
               </ul>
               <p className="mt-3 flex items-center gap-2 border-t border-gray-200 pt-3 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
-                <Icon d={ICONS.lock} className="h-3.5 w-3.5" />
-                Your actual data is never revealed on-chain.
+                <Icon d={ICONS.lock} className="h-3.5 w-3.5 shrink-0" />
+                {t("neverRevealed")}
               </p>
             </div>
 
@@ -232,7 +233,7 @@ export default function Home() {
                   <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
                 </svg>
               )}
-              {loading ? "Generating ZK proof..." : "Verify with ZK proof"}
+              {loading ? t("generating") : t("verifyBtn")}
             </button>
 
             <div aria-live="polite">
@@ -254,22 +255,22 @@ export default function Home() {
                   <div className="text-sm">
                     {result ? (
                       <>
-                        <p className="font-semibold">KYC verified</p>
-                        <p className="mt-0.5 opacity-80">Requirements met (simulated proof).</p>
+                        <p className="font-semibold">{t("verified")}</p>
+                        <p className="mt-0.5 opacity-80">{t("verifiedSub")}</p>
                         <a
                           href={EXPLORER_URL}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="mt-2 inline-flex items-center gap-1 font-medium underline underline-offset-2"
                         >
-                          View contract on Stellar Expert
+                          {t("viewContract")}
                           <Icon d={ICONS.external} className="h-3.5 w-3.5" />
                         </a>
                       </>
                     ) : (
                       <>
-                        <p className="font-semibold">Verification failed</p>
-                        <p className="mt-0.5 opacity-80">The requirements were not met.</p>
+                        <p className="font-semibold">{t("failed")}</p>
+                        <p className="mt-0.5 opacity-80">{t("failedSub")}</p>
                       </>
                     )}
                   </div>
@@ -280,11 +281,12 @@ export default function Home() {
         </div>
 
         <History attempts={history} onClear={clearHistory} />
+
         <p className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           Stellar Testnet
           <span aria-hidden="true">|</span>
-          <span className="font-mono">
+          <span className="font-mono" dir="ltr">
             {CONTRACT_ID.slice(0, 6)}...{CONTRACT_ID.slice(-4)}
           </span>
         </p>
@@ -292,4 +294,3 @@ export default function Home() {
     </main>
   );
 }
-

@@ -8,10 +8,12 @@ import {
   getAddress,
   getNetwork,
 } from "@stellar/freighter-api";
+import { useI18n } from "../i18n";
 
 const short = (a: string) => `${a.slice(0, 4)}...${a.slice(-4)}`;
 
 export default function WalletButton() {
+  const { t } = useI18n();
   const [address, setAddress] = useState<string | null>(null);
   const [network, setNetwork] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +80,7 @@ export default function WalletButton() {
           disabled={busy}
           className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
         >
-          {busy ? "Connecting..." : "Connect wallet"}
+          {busy ? t("connecting") : t("connect")}
         </button>
       </div>
     );
