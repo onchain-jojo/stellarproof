@@ -26,37 +26,37 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center p-8">
-      <div className="max-w-md w-full bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-800">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white flex flex-col items-center justify-center p-8">
+      <div className="max-w-md w-full bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-200 dark:border-gray-800">
         <h1 className="text-3xl font-bold text-yellow-400 mb-2">⭐ StellarProof</h1>
-        <p className="text-gray-400 mb-8">Private KYC verification using Zero Knowledge proofs on Stellar</p>
+        <p className="text-gray-600 dark:text-gray-400 mb-8">Private KYC verification using Zero Knowledge proofs on Stellar</p>
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm text-gray-400">Your Age (private - never revealed)</label>
+            <label className="text-sm text-gray-600 dark:text-gray-400">Your Age (private - never revealed)</label>
             <input
               type="number"
               value={age}
               onChange={(e) => setAge(e.target.value)}
               placeholder="Enter your age"
-              className="w-full mt-1 p-3 bg-gray-800 rounded-lg border border-gray-700 text-white focus:outline-none focus:border-yellow-400"
+              className="w-full mt-1 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-yellow-400"
             />
           </div>
 
           <div>
-            <label className="text-sm text-gray-400">Country Code (private - never revealed)</label>
+            <label className="text-sm text-gray-600 dark:text-gray-400">Country Code (private - never revealed)</label>
             <input
               type="text"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               placeholder="254 = Kenya"
-              className="w-full mt-1 p-3 bg-gray-800 rounded-lg border border-gray-700 text-white focus:outline-none focus:border-yellow-400"
+              className="w-full mt-1 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-none focus:border-yellow-400"
             />
           </div>
 
-          <div className="bg-gray-800 rounded-lg p-3 text-sm text-gray-400">
-            <p>✅ Minimum age required: <span className="text-white">18</span></p>
-            <p>✅ Allowed country: <span className="text-white">Kenya (254)</span></p>
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3 text-sm text-gray-600 dark:text-gray-400">
+            <p>✅ Minimum age required: <span className="text-gray-900 dark:text-white">18</span></p>
+            <p>✅ Allowed country: <span className="text-gray-900 dark:text-white">Kenya (254)</span></p>
             <p>🔐 Your actual data is never revealed on-chain</p>
           </div>
 
@@ -73,7 +73,7 @@ export default function Home() {
               {result ? (
                 <>
                   <p className="text-green-400 font-bold text-lg">✅ KYC Verified!</p>
-                  <p className="text-gray-400 text-sm mt-1">ZK proof verified on Stellar testnet</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">ZK proof verified on Stellar testnet</p>
                   <a href={`https://stellar.expert/explorer/testnet/contract/${CONTRACT_ID}`} target="_blank" className="text-yellow-400 text-sm underline mt-2 block">View Contract on Stellar Explorer →</a>
                 </>
               ) : (
