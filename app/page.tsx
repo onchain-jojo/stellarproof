@@ -2,17 +2,8 @@
 import { useEffect, useState } from "react";
 import History, { type Attempt } from "./components/History";
 import { CONTRACT_ID, EXPLORER_URL } from "./config";
+import { COUNTRIES, DEFAULT_ALLOWED, countryName } from "./countries";
 import { useI18n } from "./i18n";
-
-const COUNTRY_NAMES: Record<number, string> = {
-  254: "Kenya",
-  255: "Tanzania",
-  256: "Uganda",
-  250: "Rwanda",
-  234: "Nigeria",
-  233: "Ghana",
-  27: "South Africa",
-};
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white dark:placeholder:text-gray-600";
@@ -33,20 +24,12 @@ const ICONS = {
   external: "M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5",
 };
 
-function parseCodes(raw: string): number[] {
-  const codes = raw
-    .split(",")
-    .map((s) => parseInt(s.trim(), 10))
-    .filter((n) => Number.isFinite(n) && n > 0);
-  return Array.from(new Set(codes));
-}
-
 export default function Home() {
   const { t } = useI18n();
   const [age, setAge] = useState("");
   const [country, setCountry] = useState("254");
   const [minAge, setMinAge] = useState("18");
-  const [allowedRaw, setAllowedRaw] = useState("254");
+  const [allowed, setAllowed] = useState<number[]>(DEFAULT_ALLOWED);
   const [result, setResult] = useState<null | boolean>(null);
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<Attempt[]>([]);
@@ -65,8 +48,12 @@ export default function Home() {
     } catch {}
   };
 
+  const toggleCountry = (code: number) => {
+    setAllowed((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]));
+    setResult(null);
+  };
+
   const minAgeNum = parseInt(minAge, 10) || 0;
-  const allowed = parseCodes(allowedRaw);
   const policyValid = minAgeNum > 0 && allowed.length > 0;
 
   const verifyKYC = async () => {
@@ -114,41 +101,45 @@ export default function Home() {
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 {t("policy")}
               </p>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="minAge" className="mb-1.5 block text-sm font-medium">
-                    {t("minAge")}
-                  </label>
-                  <input
-                    id="minAge"
-                    type="number"
-                    min="1"
-                    value={minAge}
-                    onChange={(e) => {
-                      setMinAge(e.target.value);
-                      setResult(null);
-                    }}
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="allowed" className="mb-1.5 block text-sm font-medium">
-                    {t("allowedCodes")}
-                  </label>
-                  <input
-                    id="allowed"
-                    type="text"
-                    value={allowedRaw}
-                    onChange={(e) => {
-                      setAllowedRaw(e.target.value);
-                      setResult(null);
-                    }}
-                    placeholder="254, 255"
-                    className={inputClass}
-                  />
+              <div>
+                <label htmlFor="minAge" className="mb-1.5 block text-sm font-medium">
+                  {t("minAge")}
+                </label>
+                <input
+                  id="minAge"
+                  type="number"
+                  min="1"
+                  value={minAge}
+                  onChange={(e) => {
+                    setMinAge(e.target.value);
+                    setResult(null);
+                  }}
+                  className={inputClass}
+                />
+              </div>
+              <div className="mt-4">
+                <p className="mb-1.5 text-sm font-medium">{t("allowedCodes")}</p>
+                <div className="flex flex-wrap gap-2">
+                  {COUNTRIES.map((c) => {
+                    const on = allowed.includes(c.code);
+                    return (
+                      <button
+                        key={c.code}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() => toggleCountry(c.code)}
+                        className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                          on
+                            ? "border-indigo-600 bg-indigo-600 text-white"
+                            : "border-gray-300 bg-white text-gray-700 hover:border-gray-400 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-300"
+                        }`}
+                      >
+                        {c.name} ({c.code})
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{t("codesHint")}</p>
             </div>
 
             <div>
@@ -179,17 +170,21 @@ export default function Home() {
                   <Icon d={ICONS.lock} className="h-3 w-3" /> {t("private")}
                 </span>
               </label>
-              <input
+              <select
                 id="country"
-                type="text"
                 value={country}
                 onChange={(e) => {
                   setCountry(e.target.value);
                   setResult(null);
                 }}
-                placeholder="254 = Kenya"
                 className={inputClass}
-              />
+              >
+                {COUNTRIES.map((c) => (
+                  <option key={c.code} value={String(c.code)}>
+                    {c.name} ({c.code})
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm dark:border-gray-800 dark:bg-gray-950/50">
@@ -210,7 +205,7 @@ export default function Home() {
                     {t("allowedReq")}{" "}
                     <span className="font-medium text-gray-900 dark:text-white">
                       {allowed.length
-                        ? allowed.map((c) => (COUNTRY_NAMES[c] ? `${COUNTRY_NAMES[c]} (${c})` : String(c))).join(", ")
+                        ? allowed.map((c) => `${countryName(c)} (${c})`).join(", ")
                         : "-"}
                     </span>
                   </span>
