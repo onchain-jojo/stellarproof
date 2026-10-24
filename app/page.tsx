@@ -1,8 +1,17 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import History, { type Attempt } from "./components/History";
+import { CONTRACT_ID, EXPLORER_URL } from "./config";
 
-const CONTRACT_ID = "CAB232Q6K6WIHILWAAHW4K5DQQ4Q3ZRGOHSMRZSBTCXKDAHTOIVBDVCV";
-const EXPLORER_URL = `https://stellar.expert/explorer/testnet/contract/${CONTRACT_ID}`;
+const COUNTRY_NAMES: Record<number, string> = {
+  254: "Kenya",
+  255: "Tanzania",
+  256: "Uganda",
+  250: "Rwanda",
+  234: "Nigeria",
+  233: "Ghana",
+  27: "South Africa",
+};
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white dark:placeholder:text-gray-600";
@@ -23,11 +32,40 @@ const ICONS = {
   external: "M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h5",
 };
 
+function parseCodes(raw: string): number[] {
+  const codes = raw
+    .split(",")
+    .map((s) => parseInt(s.trim(), 10))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  return Array.from(new Set(codes));
+}
+
 export default function Home() {
   const [age, setAge] = useState("");
   const [country, setCountry] = useState("254");
+  const [minAge, setMinAge] = useState("18");
+  const [allowedRaw, setAllowedRaw] = useState("254");
   const [result, setResult] = useState<null | boolean>(null);
   const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState<Attempt[]>([]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("sp-history");
+      if (raw) setHistory(JSON.parse(raw));
+    } catch {}
+  }, []);
+
+  const clearHistory = () => {
+    setHistory([]);
+    try {
+      localStorage.removeItem("sp-history");
+    } catch {}
+  };
+
+  const minAgeNum = parseInt(minAge, 10) || 0;
+  const allowed = parseCodes(allowedRaw);
+  const policyValid = minAgeNum > 0 && allowed.length > 0;
 
   const verifyKYC = async () => {
     setLoading(true);
@@ -36,17 +74,24 @@ export default function Home() {
     // Simulate ZK proof generation (1.5 seconds)
     await new Promise((r) => setTimeout(r, 1500));
 
-    const ageNum = parseInt(age);
-    const countryNum = parseInt(country);
+    const ageNum = parseInt(age, 10);
+    const countryNum = parseInt(country, 10);
 
-    // ZK proof verification logic
-    const isValid = ageNum >= 18 && countryNum === 254;
+    // Demo check: replace with the real proof + contract call
+    const isValid =
+      Number.isFinite(ageNum) && ageNum >= minAgeNum && allowed.includes(countryNum);
     setResult(isValid);
+    const entry: Attempt = { t: Date.now(), ok: isValid, minAge: minAgeNum, codes: allowed.join(", ") };
+    const next = [entry, ...history].slice(0, 10);
+    setHistory(next);
+    try {
+      localStorage.setItem("sp-history", JSON.stringify(next));
+    } catch {}
     setLoading(false);
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 text-gray-900 dark:bg-gray-950 dark:text-white">
+    <main className="flex flex-1 flex-col items-center justify-center bg-gray-50 px-4 py-12 text-gray-900 dark:bg-gray-950 dark:text-white">
       <div className="w-full max-w-md">
         <div className="mb-8 flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/30">
@@ -65,9 +110,52 @@ export default function Home() {
           </p>
 
           <div className="mt-6 space-y-5">
+            <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-800">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                Policy (set by the verifier)
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="minAge" className="mb-1.5 block text-sm font-medium">
+                    Minimum age
+                  </label>
+                  <input
+                    id="minAge"
+                    type="number"
+                    min="1"
+                    value={minAge}
+                    onChange={(e) => {
+                      setMinAge(e.target.value);
+                      setResult(null);
+                    }}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="allowed" className="mb-1.5 block text-sm font-medium">
+                    Allowed codes
+                  </label>
+                  <input
+                    id="allowed"
+                    type="text"
+                    value={allowedRaw}
+                    onChange={(e) => {
+                      setAllowedRaw(e.target.value);
+                      setResult(null);
+                    }}
+                    placeholder="254, 255"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                Separate country codes with commas.
+              </p>
+            </div>
+
             <div>
               <label htmlFor="age" className="mb-1.5 flex items-center justify-between text-sm font-medium">
-                Age
+                Your age
                 <span className="inline-flex items-center gap-1 text-xs font-normal text-gray-500 dark:text-gray-400">
                   <Icon d={ICONS.lock} className="h-3 w-3" /> Private
                 </span>
@@ -77,7 +165,10 @@ export default function Home() {
                 type="number"
                 min="0"
                 value={age}
-                onChange={(e) => setAge(e.target.value)}
+                onChange={(e) => {
+                  setAge(e.target.value);
+                  setResult(null);
+                }}
                 placeholder="Enter your age"
                 className={inputClass}
               />
@@ -85,7 +176,7 @@ export default function Home() {
 
             <div>
               <label htmlFor="country" className="mb-1.5 flex items-center justify-between text-sm font-medium">
-                Country code
+                Your country code
                 <span className="inline-flex items-center gap-1 text-xs font-normal text-gray-500 dark:text-gray-400">
                   <Icon d={ICONS.lock} className="h-3 w-3" /> Private
                 </span>
@@ -94,7 +185,10 @@ export default function Home() {
                 id="country"
                 type="text"
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
+                onChange={(e) => {
+                  setCountry(e.target.value);
+                  setResult(null);
+                }}
                 placeholder="254 = Kenya"
                 className={inputClass}
               />
@@ -107,11 +201,18 @@ export default function Home() {
               <ul className="space-y-1.5 text-gray-700 dark:text-gray-300">
                 <li className="flex items-center gap-2">
                   <Icon d={ICONS.check} className="h-4 w-4 text-indigo-500" />
-                  Minimum age: <span className="font-medium text-gray-900 dark:text-white">18</span>
+                  Minimum age: <span className="font-medium text-gray-900 dark:text-white">{minAgeNum || "-"}</span>
                 </li>
-                <li className="flex items-center gap-2">
-                  <Icon d={ICONS.check} className="h-4 w-4 text-indigo-500" />
-                  Allowed country: <span className="font-medium text-gray-900 dark:text-white">Kenya (254)</span>
+                <li className="flex items-start gap-2">
+                  <Icon d={ICONS.check} className="mt-0.5 h-4 w-4 shrink-0 text-indigo-500" />
+                  <span>
+                    Allowed countries:{" "}
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {allowed.length
+                        ? allowed.map((c) => (COUNTRY_NAMES[c] ? `${COUNTRY_NAMES[c]} (${c})` : String(c))).join(", ")
+                        : "-"}
+                    </span>
+                  </span>
                 </li>
               </ul>
               <p className="mt-3 flex items-center gap-2 border-t border-gray-200 pt-3 text-xs text-gray-500 dark:border-gray-800 dark:text-gray-400">
@@ -122,7 +223,7 @@ export default function Home() {
 
             <button
               onClick={verifyKYC}
-              disabled={loading || !age}
+              disabled={loading || !age || !policyValid}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading && (
@@ -154,7 +255,7 @@ export default function Home() {
                     {result ? (
                       <>
                         <p className="font-semibold">KYC verified</p>
-                        <p className="mt-0.5 opacity-80">Eligibility confirmed on Stellar testnet.</p>
+                        <p className="mt-0.5 opacity-80">Requirements met (simulated proof).</p>
                         <a
                           href={EXPLORER_URL}
                           target="_blank"
@@ -178,6 +279,7 @@ export default function Home() {
           </div>
         </div>
 
+        <History attempts={history} onClear={clearHistory} />
         <p className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
           Stellar Testnet
@@ -190,3 +292,4 @@ export default function Home() {
     </main>
   );
 }
+

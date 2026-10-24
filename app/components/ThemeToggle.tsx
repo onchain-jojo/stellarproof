@@ -22,7 +22,7 @@ export default function ThemeToggle() {
     <button
       onClick={toggle}
       aria-label="Toggle theme"
-      className="fixed top-4 right-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-neutral-900 shadow-sm transition hover:scale-105 dark:border-white/20 dark:bg-neutral-900 dark:text-neutral-100"
+      className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white text-neutral-900 shadow-sm transition hover:scale-105 dark:border-white/20 dark:bg-neutral-900 dark:text-neutral-100"
     >
       {dark ? (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -37,3 +37,4 @@ export default function ThemeToggle() {
     </button>
   );
 }
+
