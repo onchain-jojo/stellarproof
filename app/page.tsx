@@ -4,6 +4,7 @@ import History, { type Attempt } from "./components/History";
 import { CONTRACT_ID, EXPLORER_URL } from "./config";
 import { COUNTRIES, DEFAULT_ALLOWED, countryName } from "./countries";
 import { useI18n } from "./i18n";
+import { submitVerification } from "./lib/contract";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white dark:placeholder:text-gray-600";
@@ -32,6 +33,9 @@ export default function Home() {
   const [allowed, setAllowed] = useState<number[]>(DEFAULT_ALLOWED);
   const [result, setResult] = useState<null | boolean>(null);
   const [loading, setLoading] = useState(false);
+  const [signing, setSigning] = useState(false);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [txError, setTxError] = useState<string | null>(null);
   const [history, setHistory] = useState<Attempt[]>([]);
 
   useEffect(() => {
@@ -69,6 +73,23 @@ export default function Home() {
     // Demo check: replace with the real proof + contract call
     const isValid =
       Number.isFinite(ageNum) && ageNum >= minAgeNum && allowed.includes(countryNum);
+    setTxHash(null);
+    setTxError(null);
+    if (isValid) {
+      setSigning(true);
+      try {
+        const r = await submitVerification({
+          minAge: minAgeNum,
+          allowedCountry: countryNum,
+          proofValid: true,
+        });
+        setTxHash(r.hash);
+      } catch (e) {
+        setTxError(e instanceof Error ? e.message : "Unknown error");
+      } finally {
+        setSigning(false);
+      }
+    }
     setResult(isValid);
     const entry: Attempt = { t: Date.now(), ok: isValid, minAge: minAgeNum, codes: allowed.join(", ") };
     const next = [entry, ...history].slice(0, 10);
@@ -228,7 +249,7 @@ export default function Home() {
                   <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
                 </svg>
               )}
-              {loading ? t("generating") : t("verifyBtn")}
+              {loading ? (signing ? t("signing") : t("generating")) : t("verifyBtn")}
             </button>
 
             <div aria-live="polite">
@@ -252,6 +273,22 @@ export default function Home() {
                       <>
                         <p className="font-semibold">{t("verified")}</p>
                         <p className="mt-0.5 opacity-80">{t("verifiedSub")}</p>
+                        {txHash && (
+                          <a
+                            href={`https://stellar.expert/explorer/testnet/tx/${txHash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-2 inline-flex items-center gap-1 font-medium underline underline-offset-2"
+                          >
+                            {t("viewTx")}
+                            <Icon d={ICONS.external} className="h-3.5 w-3.5" />
+                          </a>
+                        )}
+                        {txError && (
+                          <p className="mt-2 text-xs opacity-90">
+                            {t("txFailed")}: {txError}
+                          </p>
+                        )}
                         <a
                           href={EXPLORER_URL}
                           target="_blank"

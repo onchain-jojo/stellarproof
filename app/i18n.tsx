@@ -43,6 +43,9 @@ const en = {
   connect: "Connect wallet",
   connecting: "Connecting...",
   contract: "Contract",
+  signing: "Waiting for wallet signature...",
+  viewTx: "View transaction",
+  txFailed: "On-chain submission failed",
 };
 
 export type Key = keyof typeof en;
@@ -89,6 +92,9 @@ const sw: Record<Key, string> = {
   connect: "Unganisha pochi",
   connecting: "Inaunganisha...",
   contract: "Mkataba",
+  signing: "Inasubiri sahihi ya pochi...",
+  viewTx: "Tazama muamala",
+  txFailed: "Kutuma kwenye mnyororo kumeshindwa",
 };
 
 const fr: Record<Key, string> = {
@@ -133,6 +139,9 @@ const fr: Record<Key, string> = {
   connect: "Connecter le portefeuille",
   connecting: "Connexion...",
   contract: "Contrat",
+  signing: "En attente de la signature du portefeuille...",
+  viewTx: "Voir la transaction",
+  txFailed: "Échec de la soumission on-chain",
 };
 
 const es: Record<Key, string> = {
@@ -177,6 +186,9 @@ const es: Record<Key, string> = {
   connect: "Conectar billetera",
   connecting: "Conectando...",
   contract: "Contrato",
+  signing: "Esperando la firma de la billetera...",
+  viewTx: "Ver transacción",
+  txFailed: "Falló el envío on-chain",
 };
 
 const ar: Record<Key, string> = {
@@ -221,6 +233,9 @@ const ar: Record<Key, string> = {
   connect: "ربط المحفظة",
   connecting: "جارٍ الاتصال...",
   contract: "العقد",
+  signing: "في انتظار توقيع المحفظة...",
+  viewTx: "عرض المعاملة",
+  txFailed: "فشل الإرسال على السلسلة",
 };
 
 const dict = { en, sw, fr, es, ar };
