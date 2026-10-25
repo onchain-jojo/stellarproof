@@ -17,7 +17,7 @@ export const COUNTRIES: { code: number; name: string }[] = [
   { code: 91, name: "India" },
 ];
 
-export const DEFAULT_ALLOWED = [254, 255, 256, 250, 251, 234, 233, 27];
+export const DEFAULT_ALLOWED = COUNTRIES.map((c) => c.code);
 
 export const countryName = (code: number) =>
   COUNTRIES.find((c) => c.code === code)?.name ?? String(code);
