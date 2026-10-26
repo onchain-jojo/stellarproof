@@ -5,6 +5,7 @@ import { CONTRACT_ID, EXPLORER_URL } from "./config";
 import { COUNTRIES, DEFAULT_ALLOWED, countryName } from "./countries";
 import { useI18n } from "./i18n";
 import { submitVerification } from "./lib/contract";
+import CopyButton from "./components/CopyButton";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white dark:placeholder:text-gray-600";
@@ -320,7 +321,7 @@ export default function Home() {
           Stellar Testnet
           <span aria-hidden="true">|</span>
           <span className="font-mono" dir="ltr">
-            {CONTRACT_ID.slice(0, 6)}...{CONTRACT_ID.slice(-4)}
+            {CONTRACT_ID.slice(0, 6)}...{CONTRACT_ID.slice(-4)}<CopyButton value={CONTRACT_ID} />
           </span>
         </p>
       </div>
