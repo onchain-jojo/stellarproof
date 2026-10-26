@@ -84,6 +84,7 @@ export default function Home() {
           proofValid: true,
         });
         setTxHash(r.hash);
+        window.dispatchEvent(new Event("sp-verified"));
       } catch (e) {
         setTxError(e instanceof Error ? e.message : "Unknown error");
       } finally {
