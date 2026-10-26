@@ -76,9 +76,10 @@ This is a hackathon prototype. Here is exactly what is real and what is not.
 | Frontend (policy, wallet connect, i18n, theme, history) | Working |
 | Wallet connection through Freighter | Working |
 | Proof generation in the browser (Noir) | **Not yet wired.** The UI currently simulates the proof step and checks the policy locally |
-| On-chain submission of a real proof | **Not yet wired** |
+| On-chain submission from the frontend (signed in Freighter, `verify_kyc` call) | Working |
+| Contract verifies a ZK proof | **Not yet.** The deployed contract trusts a `proof_valid` flag sent by the caller and does not receive the age |
 
-The "verified" result shown in the demo comes from a local check, not from the contract. See the [roadmap](#roadmap).
+The transaction is real and recorded on Stellar Testnet, but the contract records the caller's claim and does not verify a zero-knowledge proof yet. The expiry countdown is a browser-side timer. See the [roadmap](#roadmap).
 
 ## Tech stack
 
@@ -122,7 +123,8 @@ app/
 - [x] Multi-language support with RTL
 - [x] Light and dark theme
 - [ ] Generate a real Noir proof in the browser
-- [ ] Submit the proof to the Soroban contract and show the transaction hash
+- [x] Submit a transaction to the Soroban contract and show the transaction hash
+- [ ] Redeploy a contract that verifies the Noir proof on-chain
 - [ ] Pass the policy as public inputs so the contract enforces it
 - [ ] Credential expiry and revocation
 - [ ] Translation review by native speakers
