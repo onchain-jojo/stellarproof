@@ -6,6 +6,8 @@ import { COUNTRIES, DEFAULT_ALLOWED, countryName } from "./countries";
 import { useI18n } from "./i18n";
 import { submitVerification } from "./lib/contract";
 import CopyButton from "./components/CopyButton";
+import Countdown from "./components/Countdown";
+import { saveVerification } from "./lib/expiry";
 
 const inputClass =
   "w-full rounded-lg border border-gray-300 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white dark:placeholder:text-gray-600";
@@ -85,6 +87,7 @@ export default function Home() {
           proofValid: true,
         });
         setTxHash(r.hash);
+        saveVerification(r.address);
         window.dispatchEvent(new Event("sp-verified"));
       } catch (e) {
         setTxError(e instanceof Error ? e.message : "Unknown error");
@@ -314,6 +317,7 @@ export default function Home() {
           </div>
         </div>
 
+        <Countdown />
         <History attempts={history} onClear={clearHistory} />
 
         <p className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">

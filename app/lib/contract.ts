@@ -46,7 +46,7 @@ export async function submitVerification(params: {
         nativeToScVal(params.proofValid, { type: "bool" }),
       ),
     )
-    .setTimeout(60)
+    .setTimeout(300)
     .build();
 
   const prepared = await server.prepareTransaction(tx);
@@ -58,7 +58,13 @@ export async function submitVerification(params: {
 
   const signedTx = TransactionBuilder.fromXDR(signed.signedTxXdr, NETWORK_PASSPHRASE);
   const sent = await server.sendTransaction(signedTx);
-  if (sent.status === "ERROR") throw new Error("Network rejected the transaction");
+  if (sent.status === "ERROR") {
+    let code = "unknown";
+    try {
+      code = sent.errorResult?.result().switch().name ?? "unknown";
+    } catch {}
+    throw new Error("Network rejected the transaction: " + code);
+  }
 
   for (let i = 0; i < 20; i++) {
     const res = await server.getTransaction(sent.hash);
